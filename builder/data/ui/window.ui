@@ -1,0 +1,416 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <requires lib="libadwaita" version="1.0"/>
+  
+  <object class="AdwApplicationWindow" id="window">
+    <property name="default-width">900</property>
+    <property name="default-height">600</property>
+    <property name="title">Obision Builder</property>
+    
+    <property name="content">
+      <object class="AdwBreakpointBin">
+        <property name="child">
+          <object class="AdwNavigationSplitView" id="split_view">
+            <property name="sidebar">
+              <object class="AdwNavigationPage">
+                <property name="title">Builder</property>
+                <property name="child">
+                  <object class="AdwToolbarView">
+                    <child type="top">
+                      <object class="AdwHeaderBar">
+                        <property name="show-title">true</property>
+                        <child type="start">
+                          <object class="GtkMenuButton" id="primary_menu_button">
+                            <property name="icon-name">open-menu-symbolic</property>
+                            <property name="menu-model">primary_menu</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    
+                    <property name="content">
+                      <object class="GtkListBox" id="sidebar_list">
+                        <property name="selection-mode">single</property>
+                        <style>
+                          <class name="navigation-sidebar"/>
+                        </style>
+                        
+                        <!-- Configuration -->
+                        <child>
+                          <object class="AdwActionRow" id="config_row">
+                            <property name="title">Configuration</property>
+                            <property name="activatable">true</property>
+                            <child type="prefix">
+                              <object class="GtkImage">
+                                <property name="icon-name">emblem-system-symbolic</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        
+                        <!-- Files -->
+                        <child>
+                          <object class="AdwActionRow" id="files_row">
+                            <property name="title">Files</property>
+                            <property name="activatable">true</property>
+                            <child type="prefix">
+                              <object class="GtkImage">
+                                <property name="icon-name">folder-symbolic</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        
+                        <!-- Installer Screens -->
+                        <child>
+                          <object class="AdwActionRow" id="screens_row">
+                            <property name="title">Installer Screens</property>
+                            <property name="activatable">true</property>
+                            <child type="prefix">
+                              <object class="GtkImage">
+                                <property name="icon-name">view-grid-symbolic</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        
+                        <!-- Build Package -->
+                        <child>
+                          <object class="AdwActionRow" id="build_row">
+                            <property name="title">Build Package</property>
+                            <property name="activatable">true</property>
+                            <child type="prefix">
+                              <object class="GtkImage">
+                                <property name="icon-name">package-x-generic-symbolic</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </property>
+                  </object>
+                </property>
+              </object>
+            </property>
+            
+            <property name="content">
+              <object class="AdwNavigationPage" id="content_page">
+                <property name="title">Content</property>
+                <property name="child">
+                  <object class="AdwToolbarView">
+                    <child type="top">
+                      <object class="AdwHeaderBar" id="content_header">
+                        <property name="show-title">true</property>
+                      </object>
+                    </child>
+                    
+                    <property name="content">
+                      <object class="GtkStack" id="content_stack">
+                        <property name="transition-type">crossfade</property>
+                        
+                        <!-- Configuration View -->
+                        <child>
+                          <object class="GtkStackPage">
+                            <property name="name">configuration</property>
+                            <property name="child">
+                              <object class="AdwClamp">
+                                <property name="maximum-size">600</property>
+                                <child>
+                                  <object class="GtkBox">
+                                    <property name="orientation">vertical</property>
+                                    <property name="spacing">24</property>
+                                    <property name="margin-top">24</property>
+                                    <property name="margin-bottom">24</property>
+                                    <property name="margin-start">12</property>
+                                    <property name="margin-end">12</property>
+                                    
+                                    <child>
+                                      <object class="AdwPreferencesGroup">
+                                        <property name="title">Project Information</property>
+                                        
+                                        <child>
+                                          <object class="AdwEntryRow" id="project_name_entry">
+                                            <property name="title">Project Name</property>
+                                          </object>
+                                        </child>
+                                        
+                                        <child>
+                                          <object class="AdwEntryRow" id="project_version_entry">
+                                            <property name="title">Version</property>
+                                          </object>
+                                        </child>
+                                        
+                                        <child>
+                                          <object class="AdwEntryRow" id="project_author_entry">
+                                            <property name="title">Author</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
+                                    
+                                    <child>
+                                      <object class="AdwPreferencesGroup">
+                                        <property name="title">Package Settings</property>
+                                        
+                                        <child>
+                                          <object class="AdwEntryRow" id="package_name_entry">
+                                            <property name="title">Package Name</property>
+                                            <property name="text">package.lis</property>
+                                          </object>
+                                        </child>
+                                        
+                                        <child>
+                                          <object class="AdwActionRow" id="output_dir_row">
+                                            <property name="title">Output Directory</property>
+                                            <property name="subtitle">.</property>
+                                            <child type="suffix">
+                                              <object class="GtkButton" id="output_dir_button">
+                                                <property name="label">Choose</property>
+                                                <property name="valign">center</property>
+                                              </object>
+                                            </child>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </property>
+                          </object>
+                        </child>
+                        
+                        <!-- Files View -->
+                        <child>
+                          <object class="GtkStackPage">
+                            <property name="name">files</property>
+                            <property name="child">
+                              <object class="AdwClamp">
+                                <property name="maximum-size">600</property>
+                                <child>
+                                  <object class="GtkBox">
+                                    <property name="orientation">vertical</property>
+                                    <property name="spacing">24</property>
+                                    <property name="margin-top">24</property>
+                                    <property name="margin-bottom">24</property>
+                                    <property name="margin-start">12</property>
+                                    <property name="margin-end">12</property>
+                                    
+                                    <child>
+                                      <object class="AdwPreferencesGroup">
+                                        <property name="title">Package Files</property>
+                                        
+                                        <child>
+                                          <object class="AdwActionRow">
+                                            <property name="title">Add File...</property>
+                                            <property name="activatable">true</property>
+                                            <child type="prefix">
+                                              <object class="GtkImage">
+                                                <property name="icon-name">list-add-symbolic</property>
+                                              </object>
+                                            </child>
+                                          </object>
+                                        </child>
+                                        
+                                        <child>
+                                          <object class="AdwActionRow">
+                                            <property name="title">bin/launcher</property>
+                                            <property name="subtitle">Executable</property>
+                                            <child type="suffix">
+                                              <object class="GtkButton">
+                                                <property name="icon-name">user-trash-symbolic</property>
+                                                <property name="valign">center</property>
+                                                <style>
+                                                  <class name="flat"/>
+                                                </style>
+                                              </object>
+                                            </child>
+                                          </object>
+                                        </child>
+                                        
+                                        <child>
+                                          <object class="AdwActionRow">
+                                            <property name="title">share/icons/logo.svg</property>
+                                            <property name="subtitle">Asset</property>
+                                            <child type="suffix">
+                                              <object class="GtkButton">
+                                                <property name="icon-name">user-trash-symbolic</property>
+                                                <property name="valign">center</property>
+                                                <style>
+                                                  <class name="flat"/>
+                                                </style>
+                                              </object>
+                                            </child>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </property>
+                          </object>
+                        </child>
+                        
+                        <!-- Installer Screens View -->
+                        <child>
+                          <object class="GtkStackPage">
+                            <property name="name">screens</property>
+                            <property name="child">
+                              <object class="AdwClamp">
+                                <property name="maximum-size">600</property>
+                                <child>
+                                  <object class="GtkBox">
+                                    <property name="orientation">vertical</property>
+                                    <property name="spacing">24</property>
+                                    <property name="margin-top">24</property>
+                                    <property name="margin-bottom">24</property>
+                                    <property name="margin-start">12</property>
+                                    <property name="margin-end">12</property>
+                                    
+                                    <child>
+                                      <object class="AdwPreferencesGroup">
+                                        <property name="title">Installer Screens</property>
+                                        <property name="description">Select visible screens in the installer wizard.</property>
+                                        
+                                        <child>
+                                          <object class="AdwSwitchRow">
+                                            <property name="title">Welcome Screen</property>
+                                            <property name="subtitle">Shows app logo and description</property>
+                                            <property name="active">true</property>
+                                          </object>
+                                        </child>
+                                        
+                                        <child>
+                                          <object class="AdwSwitchRow">
+                                            <property name="title">License Agreement</property>
+                                            <property name="subtitle">Displays EULA text</property>
+                                            <property name="active">true</property>
+                                          </object>
+                                        </child>
+                                        
+                                        <child>
+                                          <object class="AdwSwitchRow">
+                                            <property name="title">Installation Directory</property>
+                                            <property name="subtitle">Allow user to choose install path</property>
+                                            <property name="active">true</property>
+                                          </object>
+                                        </child>
+                                        
+                                        <child>
+                                          <object class="AdwSwitchRow">
+                                            <property name="title">Summary</property>
+                                            <property name="subtitle">Pre-install confirmation</property>
+                                            <property name="active">true</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </property>
+                          </object>
+                        </child>
+                        
+                        <!-- Build View -->
+                        <child>
+                          <object class="GtkStackPage">
+                            <property name="name">build</property>
+                            <property name="child">
+                              <object class="AdwClamp">
+                                <property name="maximum-size">600</property>
+                                <child>
+                                  <object class="GtkBox">
+                                    <property name="orientation">vertical</property>
+                                    <property name="spacing">24</property>
+                                    <property name="margin-top">24</property>
+                                    <property name="margin-bottom">24</property>
+                                    <property name="margin-start">12</property>
+                                    <property name="margin-end">12</property>
+                                    <property name="valign">center</property>
+                                    
+                                    <child>
+                                      <object class="AdwStatusPage">
+                                        <property name="icon-name">package-x-generic-symbolic</property>
+                                        <property name="title">Ready to Build</property>
+                                        <property name="description">All configurations are valid. Click build to generate the package.</property>
+                                        <style>
+                                          <class name="compact"/>
+                                        </style>
+                                        <child>
+                                          <object class="GtkButton" id="build_package_button">
+                                            <property name="label">Build Package</property>
+                                            <property name="width-request">200</property>
+                                            <property name="height-request">50</property>
+                                            <style>
+                                              <class name="suggested-action"/>
+                                              <class name="pill"/>
+                                            </style>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
+                                    
+                                    <child>
+                                      <object class="AdwPreferencesGroup">
+                                        <property name="title">Build Output</property>
+                                        <child>
+                                          <object class="GtkTextView">
+                                            <property name="editable">false</property>
+                                            <property name="monospace">true</property>
+                                            <property name="height-request">150</property>
+                                            <property name="top-margin">12</property>
+                                            <property name="bottom-margin">12</property>
+                                            <property name="left-margin">12</property>
+                                            <property name="right-margin">12</property>
+                                            <style>
+                                              <class name="card"/>
+                                            </style>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </property>
+                          </object>
+                        </child>
+                      </object>
+                    </property>
+                  </object>
+                </property>
+              </object>
+            </property>
+          </object>
+        </property>
+      </object>
+    </property>
+  </object>
+  
+  <!-- Primary Menu -->
+  <menu id="primary_menu">
+    <section>
+      <item>
+        <attribute name="label">New Project</attribute>
+        <attribute name="action">app.new-project</attribute>
+      </item>
+      <item>
+        <attribute name="label">Open Project...</attribute>
+        <attribute name="action">app.open-project</attribute>
+      </item>
+      <item>
+        <attribute name="label">Save Project</attribute>
+        <attribute name="action">app.save-project</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label">About Builder</attribute>
+        <attribute name="action">app.about</attribute>
+      </item>
+    </section>
+  </menu>
+</interface>

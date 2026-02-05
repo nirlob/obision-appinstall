@@ -1,0 +1,98 @@
+# Rust
+target/
+Cargo.lock
+**/*.rs.bk
+*.pdb
+
+# Meson build directories
+builddir/
+_build/
+build/
+subprojects/packagecache/
+subprojects/packagefiles/
+
+# C/C++ compiled files
+*.o
+*.so
+*.a
+*.lo
+*.la
+*.out
+*.obj
+*.exe
+*.dll
+*.dylib
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# JavaScript/Node
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+
+# IDE and Editor files
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-*
+.project
+.cproject
+.settings/
+
+# Build artifacts
+*.gresource
+*.gschema.valid
+*.typelib
+*.gir
+
+# Compiled translations
+*.mo
+
+# Core dumps
+core
+core.*
+
+# Generated files
+*.gschema.compiled
+*.desktop.in
+*.service.in
+
+# Log files
+*.log
+
+# Package files
+*.lis
+*.lisproj
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# System files
+.directory
+Thumbs.db

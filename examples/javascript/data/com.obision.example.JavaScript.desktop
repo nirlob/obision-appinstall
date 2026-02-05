@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Libadwaita JavaScript Demo
+Comment=GTK4 + Libadwaita demo in JavaScript
+Exec=example-javascript
+Icon=com.obision.example.JavaScript
+Terminal=false
+Type=Application
+Categories=GTK;GNOME;Development;
+StartupNotify=true

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.obision.appinstall.Builder</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>Obision Package Builder</name>
+  <summary>Create installer packages for applications</summary>
+  <description>
+    <p>
+      Obision Package Builder is a tool for creating installer packages
+      in the .lis format. It provides an intuitive interface for:
+    </p>
+    <ul>
+      <li>Configuring project metadata</li>
+      <li>Selecting files to package</li>
+      <li>Customizing installer screens</li>
+      <li>Building distributable packages</li>
+    </ul>
+  </description>
+
+  <screenshots>
+    <screenshot type="default">
+      <caption>Main window</caption>
+    </screenshot>
+  </screenshots>
+
+  <url type="homepage">https://github.com/obision</url>
+
+  <releases>
+    <release version="0.1.0" date="2026-02-05"/>
+  </releases>
+
+  <launchable type="desktop-id">com.obision.appinstall.Builder.desktop</launchable>
+
+  <provides>
+    <binary>obision-appinstall-builder</binary>
+  </provides>
+</component>

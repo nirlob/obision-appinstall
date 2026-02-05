@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.obision.appinstall.Installer</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>Obision Installer</name>
+  <summary>Package installer for .lis files</summary>
+  
+  <description>
+    <p>
+      Obision Installer helps you install .lis packages on your GNOME system.
+      Choose between system-wide installation (/opt) or user-local installation (~/.opt).
+    </p>
+  </description>
+  
+  <url type="homepage">https://github.com/obision</url>
+  
+  <content_rating type="oars-1.1" />
+  
+  <releases>
+    <release version="0.1.0" date="2026-02-05">
+      <description>
+        <p>Initial release</p>
+      </description>
+    </release>
+  </releases>
+  
+  <launchable type="desktop-id">com.obision.appinstall.Installer.desktop</launchable>
+  <provides>
+    <binary>obision-appinstall-installer</binary>
+  </provides>
+</component>

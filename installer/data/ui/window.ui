@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <requires lib="libadwaita" version="1.0"/>
+  
+  <object class="AdwApplicationWindow" id="window">
+    <property name="default-width">600</property>
+    <property name="default-height">500</property>
+    <property name="title">Obision Installer</property>
+    
+    <property name="content">
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        
+        <!-- Header Bar -->
+        <child>
+          <object class="AdwHeaderBar">
+            <property name="title-widget">
+              <object class="AdwWindowTitle">
+                <property name="title">Obision Installer</property>
+              </object>
+            </property>
+          </object>
+        </child>
+        
+        <!-- Main Content -->
+        <child>
+          <object class="AdwClamp">
+            <property name="maximum-size">600</property>
+            <property name="vexpand">true</property>
+            
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="spacing">24</property>
+                <property name="margin-top">48</property>
+                <property name="margin-bottom">48</property>
+                <property name="margin-start">24</property>
+                <property name="margin-end">24</property>
+                <property name="valign">center</property>
+                
+                <!-- Status Page -->
+                <child>
+                  <object class="AdwStatusPage">
+                    <property name="icon-name">system-software-install-symbolic</property>
+                    <property name="title">Obision Package Installer</property>
+                    <property name="description">Instala paquetes .lis en tu sistema</property>
+                  </object>
+                </child>
+                
+                <!-- Package Selection -->
+                <child>
+                  <object class="AdwPreferencesGroup">
+                    <property name="title">Paquete .lis</property>
+                    
+                    <child>
+                      <object class="AdwActionRow">
+                        <property name="title">Seleccionar paquete</property>
+                        <property name="subtitle">Elige el archivo .lis a instalar</property>
+                        
+                        <child type="suffix">
+                          <object class="GtkButton" id="package_chooser">
+                            <property name="label">Abrir</property>
+                            <property name="valign">center</property>
+                            <style>
+                              <class name="suggested-action"/>
+                            </style>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                
+                <!-- Package Information -->
+                <child>
+                  <object class="AdwPreferencesGroup" id="info_group">
+                    <property name="title">Información del Paquete</property>
+                    <property name="visible">false</property>
+                    
+                    <child>
+                      <object class="AdwActionRow">
+                        <property name="title">Nombre</property>
+                        <child type="suffix">
+                          <object class="GtkLabel" id="package_name">
+                            <property name="label">-</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    
+                    <child>
+                      <object class="AdwActionRow">
+                        <property name="title">Versión</property>
+                        <child type="suffix">
+                          <object class="GtkLabel" id="package_version">
+                            <property name="label">-</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    
+                    <child>
+                      <object class="AdwActionRow">
+                        <property name="title">Tamaño</property>
+                        <child type="suffix">
+                          <object class="GtkLabel" id="package_size">
+                            <property name="label">-</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                
+                <!-- Installation Location -->
+                <child>
+                  <object class="AdwPreferencesGroup" id="location_group">
+                    <property name="title">Ubicación de Instalación</property>
+                    <property name="visible">false</property>
+                    
+                    <child>
+                      <object class="GtkBox">
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">12</property>
+                        <property name="margin-top">12</property>
+                        <property name="margin-bottom">12</property>
+                        <property name="margin-start">12</property>
+                        <property name="margin-end">12</property>
+                        
+                        <child>
+                          <object class="GtkCheckButton" id="system_install">
+                            <property name="label">Sistema (/opt) - Requiere permisos de root</property>
+                            <property name="active">false</property>
+                          </object>
+                        </child>
+                        
+                        <child>
+                          <object class="GtkCheckButton" id="user_install">
+                            <property name="label">Usuario (~/.opt)</property>
+                            <property name="active">true</property>
+                            <property name="group">system_install</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                
+                <!-- Status and Install Button -->
+                <child>
+                  <object class="GtkBox">
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">12</property>
+                    
+                    <child>
+                      <object class="GtkLabel" id="status_label">
+                        <property name="label">Selecciona un paquete para comenzar</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                    </child>
+                    
+                    <child>
+                      <object class="GtkButton" id="install_button">
+                        <property name="label">Instalar</property>
+                        <property name="halign">center</property>
+                        <property name="sensitive">false</property>
+                        <style>
+                          <class name="suggested-action"/>
+                          <class name="pill"/>
+                        </style>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </property>
+  </object>
+</interface>

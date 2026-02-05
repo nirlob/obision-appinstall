@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <requires lib="libadwaita" version="1.0"/>
+  
+  <object class="AdwApplicationWindow" id="window">
+    <property name="default-width">600</property>
+    <property name="default-height">800</property>
+    <property name="title">Obision Example - Rust</property>
+    
+    <property name="content">
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        
+        <!-- Header Bar -->
+        <child>
+          <object class="AdwHeaderBar">
+            <property name="title-widget">
+              <object class="AdwWindowTitle">
+                <property name="title">Rust Example</property>
+                <property name="subtitle">com.obision.example.Rust</property>
+              </object>
+            </property>
+          </object>
+        </child>
+        
+        <!-- Main Content -->
+        <child>
+          <object class="AdwClamp">
+            <property name="maximum-size">600</property>
+            <property name="tightening-threshold">300</property>
+            <property name="vexpand">true</property>
+            
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="spacing">24</property>
+                <property name="margin-top">48</property>
+                <property name="margin-bottom">48</property>
+                <property name="margin-start">24</property>
+                <property name="margin-end">24</property>
+                <property name="valign">center</property>
+                
+                <!-- Status Page -->
+                <child>
+                  <object class="AdwStatusPage">
+                    <property name="icon-name">applications-science-symbolic</property>
+                    <property name="title">🦀 Rust Example</property>
+                    <property name="description">Aplicación demo con GTK4 + Libadwaita escrita en Rust</property>
+                  </object>
+                </child>
+                
+                <!-- Preferences Group -->
+                <child>
+                  <object class="AdwPreferencesGroup">
+                    <property name="title">Configuración de Ejemplo</property>
+                    <property name="description">Controles de ejemplo usando componentes de Libadwaita</property>
+                    
+                    <!-- Dark Mode Row -->
+                    <child>
+                      <object class="AdwActionRow" id="dark_mode_row">
+                        <property name="title">Modo oscuro</property>
+                        <property name="subtitle">Activar tema oscuro</property>
+                        <property name="activatable-widget">dark_mode_switch</property>
+                        
+                        <child type="suffix">
+                          <object class="GtkSwitch" id="dark_mode_switch">
+                            <property name="valign">center</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    
+                    <!-- Notifications Row -->
+                    <child>
+                      <object class="AdwActionRow" id="notifications_row">
+                        <property name="title">Notificaciones</property>
+                        <property name="subtitle">Recibir notificaciones de la aplicación</property>
+                        <property name="activatable-widget">notifications_switch</property>
+                        
+                        <child type="suffix">
+                          <object class="GtkSwitch" id="notifications_switch">
+                            <property name="valign">center</property>
+                            <property name="active">true</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                
+                <!-- Buttons -->
+                <child>
+                  <object class="GtkBox">
+                    <property name="orientation">horizontal</property>
+                    <property name="spacing">12</property>
+                    <property name="halign">center</property>
+                    <property name="margin-top">24</property>
+                    
+                    <child>
+                      <object class="GtkButton" id="primary_button">
+                        <property name="label">Botón Principal</property>
+                        <style>
+                          <class name="suggested-action"/>
+                          <class name="pill"/>
+                        </style>
+                      </object>
+                    </child>
+                    
+                    <child>
+                      <object class="GtkButton" id="secondary_button">
+                        <property name="label">Botón Secundario</property>
+                        <style>
+                          <class name="pill"/>
+                        </style>
+                      </object>
+                    </child>
+                    
+                    <child>
+                      <object class="GtkButton" id="destructive_button">
+                        <property name="label">Botón Destructivo</property>
+                        <style>
+                          <class name="destructive-action"/>
+                          <class name="pill"/>
+                        </style>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </property>
+  </object>
+</interface>

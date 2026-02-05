@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Obision Installer
+Comment=Install .lis packages on your system
+Exec=obision-appinstall-installer
+Icon=com.obision.appinstall.Installer
+Terminal=false
+Type=Application
+Categories=GTK;GNOME;System;PackageManager;
+StartupNotify=true

@@ -1,0 +1,14 @@
+[package]
+name = "liblis"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name <you@example.com>"]
+license = "MIT"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+toml = "0.8"
+tar = "0.4"
+flate2 = "1.0"
+walkdir = "2.5"
+anyhow = "1.0"

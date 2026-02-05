@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Libadwaita Demo
+Comment=Ejemplo de aplicación usando Libadwaita en Rust
+Exec=example-rust
+Icon=com.obision.example.Rust
+Terminal=false
+Type=Application
+Categories=GTK;GNOME;Utility;
+StartupNotify=true

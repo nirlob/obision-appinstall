@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.obision.example.Cpp</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>Libadwaita C++ Demo</name>
+  <summary>Example application in C++</summary>
+  <description>
+    <p>A demonstration application showcasing GTK4 and Libadwaita in C++ using gtkmm.</p>
+  </description>
+  <releases>
+    <release version="0.1.0" date="2026-02-05"/>
+  </releases>
+  <launchable type="desktop-id">com.obision.example.Cpp.desktop</launchable>
+</component>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.obision.example.Rust</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>Libadwaita Demo</name>
+  <summary>Ejemplo de aplicación usando Libadwaita en Rust</summary>
+  
+  <description>
+    <p>
+      Una aplicación de demostración que muestra el uso de Libadwaita con Rust.
+      Incluye ejemplos de componentes modernos de GNOME como HeaderBar, StatusPage,
+      PreferencesGroup, ActionRow y botones estilizados.
+    </p>
+    <p>Características:</p>
+    <ul>
+      <li>Interfaz moderna usando Libadwaita</li>
+      <li>Componentes nativos de GNOME</li>
+      <li>Diseño responsivo</li>
+      <li>Botones con estilos Adwaita</li>
+    </ul>
+  </description>
+  
+  <screenshots>
+    <screenshot type="default">
+      <caption>Ventana principal de la aplicación</caption>
+    </screenshot>
+  </screenshots>
+  
+  <url type="homepage">https://github.com/example/libadwaita-demo</url>
+  <url type="bugtracker">https://github.com/example/libadwaita-demo/issues</url>
+  
+  <content_rating type="oars-1.1" />
+  
+  <releases>
+    <release version="0.1.0" date="2026-02-05">
+      <description>
+        <p>Versión inicial</p>
+      </description>
+    </release>
+  </releases>
+  
+  <launchable type="desktop-id">com.obision.example.Rust.desktop</launchable>
+  <provides>
+    <binary>libadwaita-example</binary>
+  </provides>
+</component>

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Obision Builder
+Comment=Create .lis packages from Meson projects
+Exec=obision-appinstall-builder
+Icon=com.obision.appinstall.Builder
+Terminal=false
+Type=Application
+Categories=GTK;GNOME;Development;
+StartupNotify=true

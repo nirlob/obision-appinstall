@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Libadwaita C Demo
+Comment=GTK4 + Libadwaita demo in C
+Exec=example-c
+Icon=com.obision.example.C
+Terminal=false
+Type=Application
+Categories=GTK;GNOME;Development;
+StartupNotify=true
