@@ -13,7 +13,7 @@ The repository is organized into four independent components:
 
 ## Build Instructions
 
-This project uses **Meson** as the build system. Since the components are independent but dependent on `liblis`, they must be built in a specific order.
+This project uses **Meson** as the build system for the applications (`builder`, `installer`). `liblis` is compiled automatically as a Rust dependency.
 
 ### Prerequisites
 
@@ -23,25 +23,9 @@ This project uses **Meson** as the build system. Since the components are indepe
 *   **GTK4** and **Libadwaita** development headers
 *   `pkg-config`
 
-### 1. Build and Install `liblis` (Critical)
+### 1. Build `builder`
 
-`liblis` must be installed first so that `builder` and `installer` can link against it.
-
-```bash
-cd liblis
-meson setup builddir
-meson compile -C builddir
-sudo meson install -C builddir
-```
-
-Verify installation:
-```bash
-pkg-config --cflags --libs liblis
-```
-
-### 2. Build `builder`
-
-Once `liblis` is installed:
+The builder application handles the creation of `.lis` packages.
 
 ```bash
 cd builder
@@ -53,7 +37,9 @@ meson compile -C builddir
 sudo meson install -C builddir
 ```
 
-### 3. Build `installer`
+### 2. Build `installer`
+
+The installer application handles the installation of `.lis` packages.
 
 ```bash
 cd installer
