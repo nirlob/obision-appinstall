@@ -46,6 +46,7 @@ pub struct Project {
     /// Project metadata
     pub metadata: ProjectMetadata,
     /// List of files to include
+    #[serde(default)]
     pub files: Vec<ProjectFile>,
     /// Installer screen configuration
     pub installer_screens: Vec<InstallerScreen>,

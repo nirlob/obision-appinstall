@@ -1,0 +1,7 @@
+[workspace]
+members = [
+    "builder",
+    "installer",
+    "liblis",
+]
+resolver = "2"

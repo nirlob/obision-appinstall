@@ -1,5 +1,8 @@
 use gtk4::prelude::*;
-use gtk4::{glib, gio, Application, FileDialog};
+use gtk4::{glib, gio, Application, FileDialog, AlertDialog};
+use std::rc::Rc;
+use std::cell::RefCell;
+use std::path::PathBuf;
 use libadwaita as adw;
 use adw::prelude::AdwApplicationWindowExt;
 // use adw::prelude::AdwWindowExt; // Displayed warning, removing
@@ -60,7 +63,8 @@ fn build_ui(app: &Application) {
     window.set_application(Some(app));
 
     // Setup window interaction
-    setup_window_interaction(&window_builder);
+    let current_path: Rc<RefCell<Option<PathBuf>>> = Rc::new(RefCell::new(None));
+    setup_window_interaction(&window_builder, None, current_path);
 
     // Show welcome screen first
     show_welcome_screen(&window);
@@ -69,7 +73,7 @@ fn build_ui(app: &Application) {
     window.present();
 }
 
-fn setup_window_interaction(builder: &gtk4::Builder) {
+fn setup_window_interaction(builder: &gtk4::Builder, window_title_path: Option<&str>, current_path_state: Rc<RefCell<Option<PathBuf>>>) {
     let content_stack: gtk4::Stack = builder
         .object("content_stack")
         .expect("Could not get content_stack");
@@ -82,9 +86,15 @@ fn setup_window_interaction(builder: &gtk4::Builder) {
         .object("content_header")
         .expect("Could not get content_header");
 
+    // Set initial title
+    if let Some(title) = window_title_path {
+        content_header.set_title_widget(Some(&adw::WindowTitle::new(title, "")));
+    } else {
+        content_header.set_title_widget(Some(&adw::WindowTitle::new("untitled.lisproj", "")));
+    }
+
     // Clone for closures
     let content_stack_clone = content_stack.clone();
-    let content_header_clone = content_header.clone();
 
     // Setup sidebar navigation
     sidebar_list.connect_row_activated(move |_, row| {
@@ -92,19 +102,15 @@ fn setup_window_interaction(builder: &gtk4::Builder) {
         match index {
             0 => {
                 content_stack_clone.set_visible_child_name("configuration");
-                content_header_clone.set_title_widget(Some(&adw::WindowTitle::new("Configuration", "")));
             }
             1 => {
                 content_stack_clone.set_visible_child_name("files");
-                content_header_clone.set_title_widget(Some(&adw::WindowTitle::new("Files", "")));
             }
             2 => {
                 content_stack_clone.set_visible_child_name("screens");
-                content_header_clone.set_title_widget(Some(&adw::WindowTitle::new("Installer Screens", "")));
             }
             3 => {
                 content_stack_clone.set_visible_child_name("build");
-                content_header_clone.set_title_widget(Some(&adw::WindowTitle::new("Build Package", "")));
             }
             _ => {}
         }
@@ -167,6 +173,8 @@ fn setup_window_interaction(builder: &gtk4::Builder) {
                 let author_entry = project_author_entry.clone();
                 let pkg_entry = package_name_entry.clone();
                 
+                let current_path_clone = current_path_state.clone();
+                
                 simple_action.connect_activate(move |_, _| {
                     println!("Save project action triggered");
                     
@@ -177,38 +185,75 @@ fn setup_window_interaction(builder: &gtk4::Builder) {
                     project.metadata.author = author_entry.text().to_string();
                     project.package_name = pkg_entry.text().to_string();
                     
-                    // Create FileDialog for saving
-                    let file_dialog = FileDialog::builder()
-                        .title("Save Project")
-                        .initial_name("myproject.lisproj")
-                        .modal(true)
-                        .build();
+                    // Check if we have a current path
+                    let current_path_guard = current_path_clone.borrow();
+                    if let Some(path) = current_path_guard.as_ref() {
+                        // Existing project - confirm overwrite
+                        let alert = AlertDialog::builder()
+                            .modal(true)
+                            .message("Save Project")
+                            .detail(format!("Overwrite existing project file at {:?}?", path).as_str())
+                            .buttons(["Cancel", "Save"])
+                            .default_button(1)
+                            .cancel_button(0)
+                            .build();
                         
-                    let filter = gtk4::FileFilter::new();
-                    filter.add_pattern("*.lisproj");
-                    filter.set_name(Some("Obision Project Files"));
-                    
-                    let filters = gtk4::gio::ListStore::new::<gtk4::FileFilter>();
-                    filters.append(&filter);
-                    file_dialog.set_filters(Some(&filters));
-                    
-                    let project_clone = project.clone();
-                    file_dialog.save(Some(&window_clone), gtk4::gio::Cancellable::NONE, move |result| {
-                        match result {
-                            Ok(file) => {
-                                if let Some(path) = file.path() {
-                                    if let Err(e) = project_clone.save_to_file(&path) {
+                        let project_clone = project.clone();
+                        let path_clone = path.clone();
+                        
+                        alert.choose(Some(&window_clone), gtk4::gio::Cancellable::NONE, move |result| {
+                            if let Ok(response) = result {
+                                if response == 1 {
+                                    if let Err(e) = project_clone.save_to_file(&path_clone) {
                                         eprintln!("Error saving project: {}", e);
                                     } else {
-                                        println!("Project saved successfully to {:?}", path);
+                                        println!("Project saved successfully to {:?}", path_clone);
                                     }
                                 }
                             }
-                            Err(e) => {
-                                eprintln!("Save canceled or error: {}", e);
+                        });
+                    } else {
+                        // New project - Save As
+                        drop(current_path_guard); // Drop borrow before async/callback might want it
+                        let current_path_clone_inner = current_path_clone.clone();
+                        let content_header_clone = content_header.clone(); // Capture header for title update
+
+                        // Create FileDialog for saving
+                        let file_dialog = FileDialog::builder()
+                            .title("Save Project")
+                            .initial_name("myproject.lisproj")
+                            .modal(true)
+                            .build();
+                            
+                        let filter = gtk4::FileFilter::new();
+                        filter.add_pattern("*.lisproj");
+                        filter.set_name(Some("Obision Project Files"));
+                        
+                        let filters = gtk4::gio::ListStore::new::<gtk4::FileFilter>();
+                        filters.append(&filter);
+                        file_dialog.set_filters(Some(&filters));
+                        
+                        let project_clone = project.clone();
+                        file_dialog.save(Some(&window_clone), gtk4::gio::Cancellable::NONE, move |result| {
+                            match result {
+                                Ok(file) => {
+                                    if let Some(path) = file.path() {
+                                        if let Err(e) = project_clone.save_to_file(&path) {
+                                            eprintln!("Error saving project: {}", e);
+                                        } else {
+                                            println!("Project saved successfully to {:?}", path);
+                                            // Update state and title
+                                            *current_path_clone_inner.borrow_mut() = Some(path.clone());
+                                            content_header_clone.set_title_widget(Some(&adw::WindowTitle::new(path.to_string_lossy().as_ref(), "")));
+                                        }
+                                    }
+                                }
+                                Err(e) => {
+                                    eprintln!("Save canceled or error: {}", e);
+                                }
                             }
-                        }
-                    });
+                        });
+                    }
                 });
             }
         }
@@ -267,7 +312,8 @@ fn create_new_project(window: &adw::ApplicationWindow) {
         .expect("Could not get window");
     
     // Setup interactions for the NEW builder instance
-    setup_window_interaction(&new_builder);
+    let current_path: Rc<RefCell<Option<PathBuf>>> = Rc::new(RefCell::new(None));
+    setup_window_interaction(&new_builder, None, current_path);
 
     if let Some(content) = temp_window.content() {
         content.unparent();
@@ -313,7 +359,8 @@ fn open_project_dialog(window: &adw::ApplicationWindow) {
                         let new_builder = gtk4::Builder::from_string(include_str!("../data/ui/window.ui"));
                         
                         // Setup interactions for the NEW builder instance
-                        setup_window_interaction(&new_builder);
+                        let current_path: Rc<RefCell<Option<PathBuf>>> = Rc::new(RefCell::new(Some(path.clone())));
+                        setup_window_interaction(&new_builder, Some(path.to_string_lossy().as_ref()), current_path);
 
                         if let Some(temp_window) = new_builder.object::<adw::ApplicationWindow>("window") {
                             if let Some(content) = temp_window.content() {

@@ -20,12 +20,7 @@
                     <child type="top">
                       <object class="AdwHeaderBar">
                         <property name="show-title">true</property>
-                        <child type="start">
-                          <object class="GtkMenuButton" id="primary_menu_button">
-                            <property name="icon-name">open-menu-symbolic</property>
-                            <property name="menu-model">primary_menu</property>
-                          </object>
-                        </child>
+
                       </object>
                     </child>
                     
@@ -102,6 +97,12 @@
                     <child type="top">
                       <object class="AdwHeaderBar" id="content_header">
                         <property name="show-title">true</property>
+                        <child type="end">
+                          <object class="GtkMenuButton" id="primary_menu_button">
+                            <property name="icon-name">open-menu-symbolic</property>
+                            <property name="menu-model">primary_menu</property>
+                          </object>
+                        </child>
                       </object>
                     </child>
                     
