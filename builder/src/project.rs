@@ -36,8 +36,13 @@ pub struct ProjectMetadata {
     pub author: String,
     /// Project description
     pub description: String,
+    /// Application name (Display name)
+    pub application_name: String,
     /// Output directory for generated .lis file
     pub output_directory: PathBuf,
+    /// Desktop file path
+    #[serde(default)]
+    pub desktop_file: Option<PathBuf>,
 }
 
 /// Main project structure
@@ -61,11 +66,13 @@ impl Project {
     pub fn new() -> Self {
         Self {
             metadata: ProjectMetadata {
-                name: String::from("My Application"),
+                name: String::from("MyProject"),
                 version: String::from("1.0.0"),
                 author: String::new(),
                 description: String::new(),
+                application_name: String::from("My Application"),
                 output_directory: PathBuf::from("."),
+                desktop_file: None,
             },
             files: Vec::new(),
             installer_screens: Self::default_screens(),

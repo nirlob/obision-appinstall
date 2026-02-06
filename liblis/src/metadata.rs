@@ -7,6 +7,10 @@ pub struct Metadata {
     pub installation: InstallationInfo,
     pub desktop: DesktopInfo,
     pub dependencies: DependenciesInfo,
+    #[serde(default)]
+    pub files: Vec<FileEntry>,
+    #[serde(default)]
+    pub installer_screens: Vec<InstallerScreen>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -15,6 +19,10 @@ pub struct PackageInfo {
     pub version: String,
     pub app_id: String,
     pub description: String,
+    pub author: String,
+    pub application_name: String,
+    pub package_name: String,
+    pub compression_level: u8,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -34,6 +42,30 @@ pub struct DesktopInfo {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DependenciesInfo {
     pub bundled: Vec<String>,
+}
+
+/// Represents a file to be installed
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FileEntry {
+    /// Source filename (relative to application/ folder in the .lis)
+    pub source: String,
+    /// Destination path (relative to install directory)
+    pub destination: String,
+    /// File permissions (Unix-style, e.g., "755" for executables)
+    pub permissions: Option<String>,
+}
+
+/// Installer screen configuration
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct InstallerScreen {
+    /// Screen ID (welcome, license, directory, components, progress, finish)
+    pub id: String,
+    /// Whether this screen is enabled
+    pub enabled: bool,
+    /// Display order (1-based)
+    pub order: usize,
+    /// Optional custom content (e.g., license file path)
+    pub custom_content: Option<String>,
 }
 
 impl Metadata {

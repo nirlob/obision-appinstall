@@ -2,10 +2,9 @@ use gtk4::prelude::*;
 use gtk4::{glib, gio, Application, FileDialog, AlertDialog};
 use std::rc::Rc;
 use std::cell::RefCell;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::fs::File;
 use libadwaita as adw;
-use adw::prelude::AdwApplicationWindowExt;
 use adw::prelude::PreferencesGroupExt;
 use adw::prelude::ActionRowExt;
 
@@ -29,6 +28,30 @@ impl AppState {
 }
 
 const APP_ID: &str = "com.obision.appinstall.Builder";
+
+/// Parse a .desktop file and extract Name and Comment
+fn parse_desktop_file(path: &PathBuf) -> Result<(String, String), String> {
+    let content = std::fs::read_to_string(path)
+        .map_err(|e| format!("Failed to read .desktop file: {}", e))?;
+    
+    let mut name = String::new();
+    let mut comment = String::new();
+    
+    for line in content.lines() {
+        let line = line.trim();
+        if line.starts_with("Name=") {
+            name = line.strip_prefix("Name=").unwrap_or("").to_string();
+        } else if line.starts_with("Comment=") {
+            comment = line.strip_prefix("Comment=").unwrap_or("").to_string();
+        }
+    }
+    
+    if name.is_empty() {
+        return Err("No Name field found in .desktop file".to_string());
+    }
+    
+    Ok((name, comment))
+}
 
 fn main() -> glib::ExitCode {
     adw::init().expect("Failed to initialize libadwaita");
@@ -89,8 +112,10 @@ fn setup_window_interaction(builder: &gtk4::Builder, app_state: Rc<RefCell<AppSt
     let content_stack: gtk4::Stack = builder.object("content_stack").expect("Could not get content_stack");
     
     let project_name_entry: adw::EntryRow = builder.object("project_name_entry").expect("Could not get project_name_entry");
+    let application_name_entry: adw::EntryRow = builder.object("application_name_entry").expect("Could not get application_name_entry");
     let project_version_entry: adw::EntryRow = builder.object("project_version_entry").expect("Could not get project_version_entry");
     let project_author_entry: adw::EntryRow = builder.object("project_author_entry").expect("Could not get project_author_entry");
+    let project_description_entry: adw::EntryRow = builder.object("project_description_entry").expect("Could not get project_description_entry");
     let package_name_entry: adw::EntryRow = builder.object("package_name_entry").expect("Could not get package_name_entry");
     
     let files_group: adw::PreferencesGroup = builder.object("files_list_group").expect("Could not get files_list_group");
@@ -253,26 +278,32 @@ fn setup_window_interaction(builder: &gtk4::Builder, app_state: Rc<RefCell<AppSt
         let app_state = app_state.clone();
         let call_refresh = call_refresh.clone();
         let name_entry = project_name_entry.clone();
+        let app_name_entry = application_name_entry.clone(); // New
         let ver_entry = project_version_entry.clone();
         let auth_entry = project_author_entry.clone();
+        let desc_entry = project_description_entry.clone(); // New
         let pkg_entry = package_name_entry.clone();
         let output_row = output_dir_row.clone();
         
         move || {
-            let (name, ver, auth, pkg, out_dir) = {
+            let (name, app_name, ver, auth, desc, pkg, out_dir) = {
                 let state = app_state.borrow();
                 (
                     state.project.metadata.name.clone(),
+                    state.project.metadata.application_name.clone(),
                     state.project.metadata.version.clone(),
                     state.project.metadata.author.clone(),
+                    state.project.metadata.description.clone(),
                     state.project.package_name.clone(),
                     state.project.metadata.output_directory.clone(),
                 )
             };
             
             name_entry.set_text(&name);
+            app_name_entry.set_text(&app_name);
             ver_entry.set_text(&ver);
             auth_entry.set_text(&auth);
+            desc_entry.set_text(&desc);
             pkg_entry.set_text(&pkg);
             output_row.set_subtitle(&out_dir.to_string_lossy());
             
@@ -315,7 +346,9 @@ fn setup_window_interaction(builder: &gtk4::Builder, app_state: Rc<RefCell<AppSt
         (&project_name_entry, 0), 
         (&project_version_entry, 1), 
         (&project_author_entry, 2), 
-        (&package_name_entry, 3)
+        (&package_name_entry, 3),
+        (&application_name_entry, 4), // New
+        (&project_description_entry, 5) // New
     ];
     
     for (entry, id) in entries {
@@ -329,6 +362,8 @@ fn setup_window_interaction(builder: &gtk4::Builder, app_state: Rc<RefCell<AppSt
                 1 => if state.project.metadata.version != text { state.project.metadata.version = text; true } else { false },
                 2 => if state.project.metadata.author != text { state.project.metadata.author = text; true } else { false },
                 3 => if state.project.package_name != text { state.project.package_name = text; true } else { false },
+                4 => if state.project.metadata.application_name != text { state.project.metadata.application_name = text; true } else { false },
+                5 => if state.project.metadata.description != text { state.project.metadata.description = text; true } else { false },
                 _ => false,
             };
             drop(state);
@@ -492,6 +527,44 @@ fn setup_window_interaction(builder: &gtk4::Builder, app_state: Rc<RefCell<AppSt
             
             // Build Logic Closure
             let run_build = move || {
+                // Validate required fields
+                let state = app_state.borrow();
+                let validation_errors = {
+                    let mut errors = Vec::new();
+                    
+                    if state.project.metadata.name.trim().is_empty() {
+                        errors.push("Project Name is required");
+                    }
+                    if state.project.metadata.application_name.trim().is_empty() {
+                        errors.push("Application Name is required");
+                    }
+                    if state.project.metadata.version.trim().is_empty() {
+                        errors.push("Version is required");
+                    }
+                    if state.project.metadata.author.trim().is_empty() {
+                        errors.push("Author is required");
+                    }
+                    if state.project.metadata.description.trim().is_empty() {
+                        errors.push("Description is required");
+                    }
+                    if state.project.package_name.trim().is_empty() {
+                        errors.push("Package Name is required");
+                    }
+                    
+                    errors
+                };
+                drop(state);
+                
+                if !validation_errors.is_empty() {
+                    let error_msg = validation_errors.join("\n• ");
+                    let alert = AlertDialog::builder()
+                        .message("Missing Required Fields")
+                        .detail(&format!("Please fill in all required fields:\n• {}", error_msg))
+                        .build();
+                    alert.show(Some(&window));
+                    return;
+                }
+                
                 let buffer = build_log_view.buffer();
                 buffer.set_text(""); 
                 
@@ -508,6 +581,7 @@ fn setup_window_interaction(builder: &gtk4::Builder, app_state: Rc<RefCell<AppSt
                 let package_name = state.project.package_name.clone();
                 let files = state.project.files.clone();
                 let metadata = state.project.metadata.clone();
+                let project = state.project.clone();
                 drop(state); 
 
                 let output_path = output_dir.join(&package_name);
@@ -529,18 +603,100 @@ fn setup_window_interaction(builder: &gtk4::Builder, app_state: Rc<RefCell<AppSt
 
                     log("Starting build process...");
 
-                    // Ensure directory exists
+                    // Ensure output directory exists
                     if !output_dir_for_build.exists() {
-                         log(&format!("Creating directory: {:?}", output_dir_for_build));
-                         let _ = std::fs::create_dir_all(&output_dir_for_build);
+                         log(&format!("Creating output directory: {:?}", output_dir_for_build));
+                         if let Err(e) = std::fs::create_dir_all(&output_dir_for_build) {
+                             log(&format!("ERROR: Could not create output directory: {}", e));
+                             let alert = AlertDialog::builder().message("Build Failed").detail(&format!("Could not create output directory: {}", e)).build();
+                             alert.show(Some(&window_for_build));
+                             return;
+                         }
                     }
                     
+                    // Create unique temporary directory
+                    let temp_dir = std::env::temp_dir().join(format!("obision-build-{}", std::process::id()));
+                    log(&format!("Creating temporary build directory: {:?}", temp_dir));
+                    
+                    if let Err(e) = std::fs::create_dir_all(&temp_dir) {
+                        log(&format!("ERROR: Could not create temp directory: {}", e));
+                        let alert = AlertDialog::builder().message("Build Failed").detail(&format!("Could not create temp directory: {}", e)).build();
+                        alert.show(Some(&window_for_build));
+                        return;
+                    }
+                    
+                    // Create install/ and application/ directories
+                    let install_dir = temp_dir.join("install");
+                    let application_dir = temp_dir.join("application");
+                    
+                    if let Err(e) = std::fs::create_dir(&install_dir) {
+                        log(&format!("ERROR: Could not create install directory: {}", e));
+                        let _ = std::fs::remove_dir_all(&temp_dir);
+                        let alert = AlertDialog::builder().message("Build Failed").detail(&format!("Could not create install directory: {}", e)).build();
+                        alert.show(Some(&window_for_build));
+                        return;
+                    }
+                    
+                    if let Err(e) = std::fs::create_dir(&application_dir) {
+                        log(&format!("ERROR: Could not create application directory: {}", e));
+                        let _ = std::fs::remove_dir_all(&temp_dir);
+                        let alert = AlertDialog::builder().message("Build Failed").detail(&format!("Could not create application directory: {}", e)).build();
+                        alert.show(Some(&window_for_build));
+                        return;
+                    }
+                    
+                    // === POPULATE INSTALL FOLDER ===
+                    log("Populating install/ folder...");
+                    
+                    // Copy .desktop file to install/
+                    if let Some(ref desktop_file) = metadata.desktop_file {
+                        if desktop_file.exists() {
+                            if let Some(filename) = desktop_file.file_name() {
+                                let dest = install_dir.join(filename);
+                                log(&format!("Copying: {} -> install/{}", desktop_file.display(), filename.to_string_lossy()));
+                                if let Err(e) = std::fs::copy(desktop_file, &dest) {
+                                    log(&format!("ERROR copying desktop file: {}", e));
+                                }
+                            }
+                        } else {
+                            log("WARNING: Desktop file not found");
+                        }
+                    } else {
+                        log("WARNING: No desktop file specified");
+                    }
+                    
+                    // === POPULATE APPLICATION FOLDER ===
+                    log("Populating application/ folder...");
+                    
+                    for file_entry in &files {
+                        if file_entry.source.exists() {
+                            let dest = application_dir.join(&file_entry.destination);
+                            log(&format!("Copying: {} -> application/{}", file_entry.source.display(), file_entry.destination));
+                            
+                            // Create parent directories if needed
+                            if let Some(parent) = dest.parent() {
+                                if let Err(e) = std::fs::create_dir_all(parent) {
+                                    log(&format!("ERROR creating directory for {}: {}", file_entry.destination, e));
+                                    continue;
+                                }
+                            }
+                            
+                            if let Err(e) = std::fs::copy(&file_entry.source, &dest) {
+                                log(&format!("ERROR copying file: {}", e));
+                            }
+                        } else {
+                            log(&format!("WARNING: File not found: {}", file_entry.source.display()));
+                        }
+                    }
+                    
+                    // === CREATE .LIS ARCHIVE FROM TEMP DIRECTORY ===
                     log(&format!("Creating package file: {:?}", output_path_for_build));
                     let f = match File::create(&output_path_for_build) {
                         Ok(f) => f,
                         Err(e) => {
-                            log(&format!("ERROR: Could not create file: {}", e));
-                            let alert = AlertDialog::builder().message("Build Failed").detail(&format!("Could not create file: {}", e)).build();
+                            log(&format!("ERROR: Could not create package file: {}", e));
+                            let _ = std::fs::remove_dir_all(&temp_dir);
+                            let alert = AlertDialog::builder().message("Build Failed").detail(&format!("Could not create package file: {}", e)).build();
                             alert.show(Some(&window_for_build));
                             return;
                         }
@@ -549,72 +705,100 @@ fn setup_window_interaction(builder: &gtk4::Builder, app_state: Rc<RefCell<AppSt
                     let enc = flate2::write::GzEncoder::new(f, flate2::Compression::default());
                     let mut tar = tar::Builder::new(enc);
                     
-                    // 1. Add binary/files
-                    log("Adding files to archive...");
-                    for file_entry in &files {
-                        if file_entry.source.exists() {
-                            let dest = format!("binary/{}", file_entry.destination); 
-                            log(&format!("Adding: {} -> {}", file_entry.source.display(), dest));
-                            if let Err(e) = tar.append_path_with_name(&file_entry.source, &dest) {
-                                log(&format!("ERROR adding file: {}", e));
-                                eprintln!("Failed to add file {:?}: {}", file_entry.source, e);
-                            }
-                        } else {
-                            log(&format!("WARNING: File not found: {}", file_entry.source.display()));
-                        }
+                    log("Adding install/ directory to archive...");
+                    if let Err(e) = tar.append_dir_all("install", &install_dir) {
+                        log(&format!("ERROR adding install directory: {}", e));
                     }
                     
-                    // 2. Add metadata.toml
+                    log("Adding application/ directory to archive...");
+                    if let Err(e) = tar.append_dir_all("application", &application_dir) {
+                        log(&format!("ERROR adding application directory: {}", e));
+                    }
+                    
+                    // Generate comprehensive metadata.toml with all project information
                      log("Generating metadata.toml...");
-                     let toml_content = format!(
-                         r#"[package]
-name = "{}"
-version = "{}"
-app_id = "com.example.{}"
-description = "{}"
-
-[installation]
-target_dir_system = "/opt/{}"
-target_dir_user = "~/.local/share/{}"
-
-[desktop]
-name = "{}"
-exec = "{}"
-icon = ""
-categories = ["Utility"]
-
-[dependencies]
-bundled = []
-"#,
-                        metadata.name,
-                        metadata.version,
-                        metadata.name.to_lowercase().replace(" ", "-"),
-                        metadata.description,
-                        metadata.name.to_lowercase().replace(" ", "-"),
-                        metadata.name.to_lowercase().replace(" ", "-"),
-                        metadata.name,
-                        metadata.name.to_lowercase().replace(" ", "-"),
-                    );
-                    
-                    let mut header = tar::Header::new_gnu();
-                    header.set_size(toml_content.len() as u64);
-                    header.set_mode(0o644);
-                    header.set_cksum();
-                    
-                    if let Err(e) = tar.append_data(&mut header, "metadata.toml", toml_content.as_bytes()) {
-                         log(&format!("ERROR adding metadata: {}", e));
-                         eprintln!("Failed to add metadata: {}", e);
-                    }
+                     
+                     // Convert project files to metadata format
+                     let metadata_files: Vec<liblis::metadata::FileEntry> = files.iter().map(|f| {
+                         liblis::metadata::FileEntry {
+                             source: f.destination.clone(), // In the .lis, it's in application/ folder
+                             destination: f.destination.clone(),
+                             permissions: f.permissions.clone(),
+                         }
+                     }).collect();
+                     
+                     // Convert installer screens to metadata format
+                     let metadata_screens: Vec<liblis::metadata::InstallerScreen> = project.installer_screens.iter().map(|s| {
+                         liblis::metadata::InstallerScreen {
+                             id: s.id.clone(),
+                             enabled: s.enabled,
+                             order: s.order,
+                             custom_content: s.custom_content.clone(),
+                         }
+                     }).collect();
+                     
+                     // Create complete metadata structure
+                     let full_metadata = liblis::Metadata {
+                         package: liblis::metadata::PackageInfo {
+                             name: metadata.name.clone(),
+                             version: metadata.version.clone(),
+                             app_id: format!("com.example.{}", metadata.name.to_lowercase().replace(" ", "-")),
+                             description: metadata.description.clone(),
+                             author: metadata.author.clone(),
+                             application_name: metadata.application_name.clone(),
+                             package_name: package_name.clone(),
+                             compression_level: project.compression_level,
+                         },
+                         installation: liblis::metadata::InstallationInfo {
+                             target_dir_system: format!("/opt/{}", metadata.name.to_lowercase().replace(" ", "-")),
+                             target_dir_user: format!("~/.local/share/{}", metadata.name.to_lowercase().replace(" ", "-")),
+                         },
+                         desktop: liblis::metadata::DesktopInfo {
+                             name: metadata.application_name.clone(),
+                             exec: metadata.name.to_lowercase().replace(" ", "-"),
+                             icon: String::new(),
+                             categories: vec!["Utility".to_string()],
+                         },
+                         dependencies: liblis::metadata::DependenciesInfo {
+                             bundled: vec![],
+                         },
+                         files: metadata_files,
+                         installer_screens: metadata_screens,
+                     };
+                     
+                     // Serialize to TOML
+                     let toml_content = match full_metadata.to_toml() {
+                         Ok(content) => content,
+                         Err(e) => {
+                             log(&format!("ERROR serializing metadata: {}", e));
+                             let _ = std::fs::remove_dir_all(&temp_dir);
+                             let alert = AlertDialog::builder().message("Build Failed").detail(&format!("Error creating metadata: {}", e)).build();
+                             alert.show(Some(&window_for_build));
+                             return;
+                         }
+                     };
+                     
+                     let mut header = tar::Header::new_gnu();
+                     header.set_size(toml_content.len() as u64);
+                     header.set_mode(0o644);
+                     header.set_cksum();
+                     
+                     if let Err(e) = tar.append_data(&mut header, "metadata.toml", toml_content.as_bytes()) {
+                          log(&format!("ERROR adding metadata: {}", e));
+                     }
 
                     log("Finalizing archive...");
                     match tar.finish() {
                         Ok(_) => {
+                            log("Cleaning up temporary directory...");
+                            let _ = std::fs::remove_dir_all(&temp_dir);
                             log("Build Successful!");
                             let alert = AlertDialog::builder().message("Build Successful").detail(&format!("Package created at {:?}", output_path_for_build)).build();
                             alert.show(Some(&window_for_build));
                         },
                         Err(e) => {
                             log(&format!("ERROR finalizing archive: {}", e));
+                            let _ = std::fs::remove_dir_all(&temp_dir);
                             let alert = AlertDialog::builder().message("Build Failed").detail(&format!("Error finalizing archive: {}", e)).build();
                             alert.show(Some(&window_for_build));
                         }
@@ -702,6 +886,7 @@ bundled = []
         let update_save_action = update_save_action.clone();
         
         let root_stack = root_stack.clone();
+        let window_clone = window.clone();
         
         simple.connect_activate(move |_, _| {
              let app_state = app_state.clone();
@@ -709,22 +894,91 @@ bundled = []
              let update_title = update_title.clone();
              let content_stack = content_stack.clone();
              let root_stack = root_stack.clone();
-             
+             let window = window_clone.clone();
              let update_save_action = update_save_action.clone();
+             
              check_unsaved(Rc::new(move || {
-                 let mut state = app_state.borrow_mut();
-                 state.project = Project::new();
-                 state.current_path = None;
-                 state.is_modified = false;
-                 drop(state);
+                 let file_dialog = FileDialog::builder().title("Select .desktop File").modal(true).build();
                  
-                 update_ui();
-                 update_title();
-                 update_save_action();
-                 root_stack.set_visible_child_name("main_view"); // Switch view
-                 content_stack.set_visible_child_name("configuration");
+                 // Add filter for .desktop files
+                 let filter = gtk4::FileFilter::new();
+                 filter.add_pattern("*.desktop");
+                 filter.set_name(Some("Desktop Entry Files"));
+                 let filters = gtk4::gio::ListStore::new::<gtk4::FileFilter>();
+                 filters.append(&filter);
+                 file_dialog.set_filters(Some(&filters));
                  
-                 // Note: we don't show welcome screen here as per standard Ctrl+N behavior
+                 let app_state = app_state.clone();
+                 let update_ui = update_ui.clone();
+                 let update_title = update_title.clone();
+                 let update_save_action = update_save_action.clone();
+                 let content_stack = content_stack.clone();
+                 let root_stack = root_stack.clone();
+                 let window_for_error = window.clone();
+                 
+                 file_dialog.open(Some(&window), gtk4::gio::Cancellable::NONE, move |result| {
+                     if let Ok(file) = result {
+                         if let Some(desktop_path) = file.path() {
+                             // Parse .desktop file
+                             match parse_desktop_file(&desktop_path) {
+                                 Ok((app_name, description)) => {
+                                     // Get parent directory (should be 'data' folder)
+                                     if let Some(data_dir) = desktop_path.parent() {
+                                         if let Some(project_root) = data_dir.parent() {
+                                             let mut state = app_state.borrow_mut();
+                                             state.project = Project::new();
+                                             
+                                             // Set project root as output directory
+                                             state.project.metadata.output_directory = project_root.to_path_buf();
+                                             
+                                             // Extract project name from folder
+                                             if let Some(name) = project_root.file_name() {
+                                                 state.project.metadata.name = name.to_string_lossy().to_string();
+                                             }
+                                             
+                                             // Set application name and description from .desktop file
+                                             state.project.metadata.application_name = app_name;
+                                             state.project.metadata.description = description;
+                                             
+                                             // Store desktop file path
+                                             state.project.metadata.desktop_file = Some(desktop_path.clone());
+                                             
+                                             state.current_path = None;
+                                             state.project.package_name = format!("{}.lis", state.project.metadata.name.to_lowercase().replace(" ", "-"));
+                                             state.is_modified = false; 
+                                             drop(state);
+                                             
+                                             update_ui();
+                                             update_title();
+                                             update_save_action();
+                                             root_stack.set_visible_child_name("main_view");
+                                             content_stack.set_visible_child_name("configuration");
+                                         } else {
+                                             let alert = AlertDialog::builder()
+                                                 .message("Invalid File Location")
+                                                 .detail("The .desktop file must be in a 'data' folder within your project root.")
+                                                 .build();
+                                             alert.show(Some(&window_for_error));
+                                         }
+                                     } else {
+                                         let alert = AlertDialog::builder()
+                                             .message("Invalid File Location")
+                                             .detail("Could not determine project structure.")
+                                             .build();
+                                         alert.show(Some(&window_for_error));
+                                     }
+                                 },
+                                 Err(e) => {
+                                     let alert = AlertDialog::builder()
+                                         .message("Failed to Parse .desktop File")
+                                         .detail(&e)
+                                         .build();
+                                     alert.show(Some(&window_for_error));
+                                 }
+                             }
+                         }
+                     }
+                 });
              }));
         });
     }

@@ -143,6 +143,12 @@
                                                 </child>
                                                 
                                                 <child>
+                                                  <object class="AdwEntryRow" id="application_name_entry">
+                                                    <property name="title">Application Name</property>
+                                                  </object>
+                                                </child>
+                                                
+                                                <child>
                                                   <object class="AdwEntryRow" id="project_version_entry">
                                                     <property name="title">Version</property>
                                                   </object>
@@ -151,6 +157,12 @@
                                                 <child>
                                                   <object class="AdwEntryRow" id="project_author_entry">
                                                     <property name="title">Author</property>
+                                                  </object>
+                                                </child>
+
+                                                <child>
+                                                  <object class="AdwEntryRow" id="project_description_entry">
+                                                    <property name="title">Description</property>
                                                   </object>
                                                 </child>
                                               </object>

@@ -45,6 +45,17 @@
                 <style>
                     <class name="compact"/>
                 </style>
+                <property name="child">
+                  <object class="GtkLabel">
+                    <property name="label">When selecting a new project, select the desktop file of your project. The project must have *.desktop file in the data folder. If you open a project, the lisproj file must be in the project root folder.</property>
+                    <property name="wrap">true</property>
+                    <property name="justify">center</property>
+                    <style>
+                      <class name="caption"/>
+                      <class name="dim-label"/>
+                    </style>
+                  </object>
+                </property>
               </object>
             </child>
             

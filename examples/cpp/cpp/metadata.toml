@@ -1,0 +1,18 @@
+[package]
+name = "cpp"
+version = "1.0.0"
+app_id = "com.example.cpp"
+description = "GTK4 + Libadwaita demo in C++"
+
+[installation]
+target_dir_system = "/opt/cpp"
+target_dir_user = "~/.local/share/cpp"
+
+[desktop]
+name = "Libadwaita C++ Demo"
+exec = "cpp"
+icon = ""
+categories = ["Utility"]
+
+[dependencies]
+bundled = []
