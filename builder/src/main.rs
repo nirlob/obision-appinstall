@@ -125,6 +125,12 @@ fn setup_window_interaction(builder: &gtk4::Builder, app_state: Rc<RefCell<AppSt
     let output_dir_button: gtk4::Button = builder.object("output_dir_button").expect("output_dir_button");
     let build_package_button: gtk4::Button = builder.object("build_package_button").expect("build_package_button");
     let build_log_view: gtk4::TextView = builder.object("build_log_view").expect("build_log_view");
+    
+    // Installer screen switches
+    let screen_welcome: adw::SwitchRow = builder.object("screen_welcome").expect("Could not get screen_welcome");
+    let screen_license: adw::SwitchRow = builder.object("screen_license").expect("Could not get screen_license");
+    let screen_install_location: adw::SwitchRow = builder.object("screen_install_location").expect("Could not get screen_install_location");
+    let screen_finish: adw::SwitchRow = builder.object("screen_finish").expect("Could not get screen_finish");
 
     // == Helpers ==
 
@@ -750,8 +756,8 @@ fn setup_window_interaction(builder: &gtk4::Builder, app_state: Rc<RefCell<AppSt
                              compression_level: project.compression_level,
                          },
                          installation: liblis::metadata::InstallationInfo {
-                             target_dir_system: format!("/opt/{}", metadata.name.to_lowercase().replace(" ", "-")),
-                             target_dir_user: format!("~/.local/share/{}", metadata.name.to_lowercase().replace(" ", "-")),
+                             prefix_system: "/usr/local".to_string(),
+                             prefix_user: "~/.local".to_string(),
                          },
                          desktop: liblis::metadata::DesktopInfo {
                              name: metadata.application_name.clone(),
@@ -1133,6 +1139,68 @@ fn setup_window_interaction(builder: &gtk4::Builder, app_state: Rc<RefCell<AppSt
 
     if let Some(first_row) = sidebar_list.row_at_index(0) {
         sidebar_list.select_row(Some(&first_row));
+    }
+    
+    // == Connect Installer Screen Switches ==
+    
+    // Helper to update screen enabled state
+    let update_screen_state = {
+        let app_state = app_state.clone();
+        let mark_modified = mark_modified.clone();
+        move |screen_id: &str, enabled: bool| {
+            let mut state = app_state.borrow_mut();
+            if let Some(screen) = state.project.installer_screens.iter_mut().find(|s| s.id == screen_id) {
+                screen.enabled = enabled;
+                drop(state);
+                mark_modified();
+            }
+        }
+    };
+    
+    // Connect welcome screen switch
+    {
+        let update_fn = update_screen_state.clone();
+        screen_welcome.connect_active_notify(move |switch| {
+            update_fn("welcome", switch.is_active());
+        });
+    }
+    
+    // Connect license screen switch
+    {
+        let update_fn = update_screen_state.clone();
+        screen_license.connect_active_notify(move |switch| {
+            update_fn("license", switch.is_active());
+        });
+    }
+    
+    // Connect install_location screen switch
+    {
+        let update_fn = update_screen_state.clone();
+        screen_install_location.connect_active_notify(move |switch| {
+            update_fn("install_location", switch.is_active());
+        });
+    }
+    
+    // Connect finish screen switch
+    {
+        let update_fn = update_screen_state.clone();
+        screen_finish.connect_active_notify(move |switch| {
+            update_fn("finish", switch.is_active());
+        });
+    }
+    
+    // Load initial screen states from project
+    {
+        let state = app_state.borrow();
+        for screen in &state.project.installer_screens {
+            match screen.id.as_str() {
+                "welcome" => screen_welcome.set_active(screen.enabled),
+                "license" => screen_license.set_active(screen.enabled),
+                "install_location" => screen_install_location.set_active(screen.enabled),
+                "finish" => screen_finish.set_active(screen.enabled),
+                _ => {}
+            }
+        }
     }
 }
 

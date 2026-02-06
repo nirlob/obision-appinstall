@@ -15,7 +15,8 @@ pub struct ProjectFile {
 /// Installer screen configuration
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct InstallerScreen {
-    /// Screen ID (welcome, license, directory, components, progress, finish)
+    /// Screen ID (welcome, license, install_location, finish)
+    /// Note: progress screen is always shown automatically during installation
     pub id: String,
     /// Whether this screen is enabled
     pub enabled: bool,
@@ -97,27 +98,15 @@ impl Project {
                 custom_content: None,
             },
             InstallerScreen {
-                id: String::from("directory"),
+                id: String::from("install_location"),
                 enabled: true,
                 order: 3,
                 custom_content: None,
             },
             InstallerScreen {
-                id: String::from("components"),
-                enabled: false,
-                order: 4,
-                custom_content: None,
-            },
-            InstallerScreen {
-                id: String::from("progress"),
-                enabled: true,
-                order: 5,
-                custom_content: None,
-            },
-            InstallerScreen {
                 id: String::from("finish"),
                 enabled: true,
-                order: 6,
+                order: 4,
                 custom_content: None,
             },
         ]

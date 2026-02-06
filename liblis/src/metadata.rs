@@ -27,8 +27,10 @@ pub struct PackageInfo {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct InstallationInfo {
-    pub target_dir_system: String,
-    pub target_dir_user: String,
+    /// Installation prefix for system-wide installation (e.g., /usr/local)
+    pub prefix_system: String,
+    /// Installation prefix for user installation (e.g., ~/.local)
+    pub prefix_user: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

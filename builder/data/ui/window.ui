@@ -261,36 +261,36 @@
                                             <child>
                                               <object class="AdwPreferencesGroup">
                                                 <property name="title">Installer Screens</property>
-                                                <property name="description">Select visible screens in the installer wizard.</property>
+                                                <property name="description">Select which screens to show in the installer wizard. Progress screen is always shown automatically.</property>
                                                 
                                                 <child>
-                                                  <object class="AdwSwitchRow">
+                                                  <object class="AdwSwitchRow" id="screen_welcome">
                                                     <property name="title">Welcome Screen</property>
-                                                    <property name="subtitle">Shows app logo and description</property>
+                                                    <property name="subtitle">Shows app name, version, and description</property>
                                                     <property name="active">true</property>
                                                   </object>
                                                 </child>
                                                 
                                                 <child>
-                                                  <object class="AdwSwitchRow">
+                                                  <object class="AdwSwitchRow" id="screen_license">
                                                     <property name="title">License Agreement</property>
-                                                    <property name="subtitle">Displays EULA text</property>
+                                                    <property name="subtitle">Displays license or EULA text</property>
                                                     <property name="active">true</property>
                                                   </object>
                                                 </child>
                                                 
                                                 <child>
-                                                  <object class="AdwSwitchRow">
-                                                    <property name="title">Installation Directory</property>
-                                                    <property name="subtitle">Allow user to choose install path</property>
+                                                  <object class="AdwSwitchRow" id="screen_install_location">
+                                                    <property name="title">Install Location</property>
+                                                    <property name="subtitle">Let user choose system (/opt) or user (~/.local/share) installation</property>
                                                     <property name="active">true</property>
                                                   </object>
                                                 </child>
                                                 
                                                 <child>
-                                                  <object class="AdwSwitchRow">
-                                                    <property name="title">Summary</property>
-                                                    <property name="subtitle">Pre-install confirmation</property>
+                                                  <object class="AdwSwitchRow" id="screen_finish">
+                                                    <property name="title">Finish Screen</property>
+                                                    <property name="subtitle">Shows installation completion message</property>
                                                     <property name="active">true</property>
                                                   </object>
                                                 </child>
